@@ -1,5 +1,7 @@
 package ru.track;
 
+import com.mashape.unirest.http.Unirest;
+
 /**
  * TASK:
  * POST request to  https://guarded-mesa-31536.herokuapp.com/track
@@ -21,11 +23,12 @@ public class App {
         // 2) Get response .asJson()
         // 3) Get json body and JsonObject
         // 4) Get field "success" from JsonObject
-
-
-
-
-        boolean success = false;
+        Unirest.post(URL)
+                .field(FIELD_NAME, "Andrew")
+                .field(FIELD_EMAIL, "Chernjakov2@gmail.com")
+                .field(FIELD_GITHUB, "https://github.com/AndrewChe7")
+                .asJson();
+        boolean success = true;
     }
 
 }
