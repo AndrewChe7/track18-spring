@@ -1,6 +1,10 @@
 package ru.track;
 
+import org.apache.commons.lang3.StringUtils;
+
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 
 
 /**
@@ -40,7 +44,17 @@ public class CountWords {
      * @return - целое число - сумма всех чисел из файла
      */
     public long countNumbers(File file) throws Exception {
-        return 0;
+        FileReader fileReader = new FileReader(file);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+        String line = bufferedReader.readLine();
+        long result = 0;
+        while (line != null) {
+            if (StringUtils.isNumeric(line) && !line.equals(skipWord)) {
+                result += Integer.parseInt(line);
+            }
+            line = bufferedReader.readLine();
+        }
+        return result;
     }
 
 
@@ -52,7 +66,25 @@ public class CountWords {
      * @return - результирующая строка
      */
     public String concatWords(File file) throws Exception {
-        return null;
+        FileReader fileReader = new FileReader(file);
+        BufferedReader bufferedReader = new BufferedReader(fileReader);
+        String line = bufferedReader.readLine();
+        StringBuilder builderResult = new StringBuilder();
+        while (line != null) {
+            if (!line.isEmpty() && !StringUtils.isNumeric(line) && !line.equals(skipWord)) {
+                builderResult.append(line);
+                builderResult.append(" ");
+
+            }
+            line = bufferedReader.readLine();
+        }
+        return builderResult.toString();
+    }
+
+    public static void main (String[] args) throws Exception {
+        CountWords cw = new CountWords("");
+        File file = new File("/media/andrewche/FILES/projects/track18-spring/L2-objects/words.txt");
+        System.out.println(cw.concatWords(file));
     }
 
 }
