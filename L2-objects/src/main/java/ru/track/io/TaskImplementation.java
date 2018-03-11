@@ -6,8 +6,7 @@ import ru.track.io.vendor.Bootstrapper;
 import ru.track.io.vendor.FileEncoder;
 import ru.track.io.vendor.ReferenceTaskImplementation;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.net.InetSocketAddress;
 
 public final class TaskImplementation implements FileEncoder {
@@ -21,7 +20,36 @@ public final class TaskImplementation implements FileEncoder {
     @NotNull
     public File encodeFile(@NotNull String finPath, @Nullable String foutPath) throws IOException {
         /* XXX: https://docs.oracle.com/javase/8/docs/api/java/io/File.html#deleteOnExit-- */
-        throw new UnsupportedOperationException(); // TODO: implement
+        File inputFile = new File(finPath);
+        File outputFile;
+
+        if (foutPath == null) {
+            outputFile = File.createTempFile("base64", ".txt");
+            outputFile.deleteOnExit();
+        } else {
+            outputFile = new File(foutPath);
+        }
+
+        InputStream inputStream = new FileInputStream(inputFile);
+        FileWriter fileWriter = new FileWriter(outputFile);
+
+        byte[] inputBytes = new byte[3];
+
+        int readLen = inputStream.read(inputBytes, 0, 3);
+
+        while (readLen != -1) {
+            int fullInput = 0;
+            for (int i = 0; i < readLen; i++) {
+                fullInput += inputBytes[i] << ((2 - i) * 8);
+            }
+            for (int i = 0; i < readLen + 1; i++) {
+                int index = (fullInput >> (3 - i) * 6) % 64;
+                fileWriter.write(toBase64[index]);
+            }
+            if (readLen == 1) fileWriter.write("==");
+            if (readLen == 2) fileWriter.write("=");
+        }
+        return outputFile;
     }
 
     private static final char[] toBase64 = {
@@ -33,7 +61,7 @@ public final class TaskImplementation implements FileEncoder {
     };
 
     public static void main(String[] args) throws Exception {
-        final FileEncoder encoder = new ReferenceTaskImplementation();
+        final FileEncoder encoder = new TaskImplementation();
         // NOTE: open http://localhost:9000/ in your web browser
         (new Bootstrapper(args, encoder))
                 .bootstrap("", new InetSocketAddress("127.0.0.1", 9000));
